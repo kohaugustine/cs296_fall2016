@@ -18,6 +18,12 @@
 ; file that represented one senator is now a distinct string in the 
 ; seq that is referred to by dl.
 (def dl (str/split data #"\n"))
+  
+; Helper function for split-senators that splits each line into 4 
+; separate strings, each string representing each field.
+(defn split-each-line
+  [line]
+  (str/split line #" " 4))  ;; another quote to end the confusion "
 
 
 ; Helper function for create-voting-dict
@@ -27,12 +33,6 @@
 (defn split-info
     [data]
     (map split-each-line (str/split data #"\n")))
-  
-; Helper function for split-senators that splits each line into 4 
-; separate strings, each string representing each field.
-(defn split-each-line
-  [line]
-  (str/split line #" " 4))  ;; another quote to end the confusion "
 
 ; Helper function for create-voting-dict
 ; Converts the string of voting numbers into a vector of ints
@@ -48,7 +48,7 @@
         (map first (split-info dataset))
         (map create-vote-vector (split-info data))))
 
-;; Lab Part 2.12.2: Reading in the file END
+;; Lab Part 2.12.2: Reading in the file COMPLETED
 
 ;; Lab Part 2.12.4: Policy comparison BEGIN
 
@@ -56,10 +56,11 @@
 ; for all other functions in the lab.
 (defn dot-pdt
   [v1 v2]
-  (reduce + (mapv (fn [a b] (* a b)) v1 v2)))
+  (reduce + (mapv (fn [a b] (* (float a) (float b))) v1 v2)))
 
 ; Task 2.12.2: policy-compare function
 ; votemap is the hashmap that is generated from create-voting-dict function
+; n1 and n2 are the names of the two senators that you want to compare
 (defn policy-compare
   [n1 n2 votemap]    
   (dot-pdt (votemap n1) (votemap n2)))
@@ -67,14 +68,22 @@
 
 ;; Helper functions for tasks 2.12.3 and 2.12.4 
 
-; Creates a hashmap containing each senator's name as the key and the 
+; Creates a hashmap containing each senator's name as the key with the 
 ; value being the dot product between each senator's voting records and
-; that of the particular sen being passed in
+; that of the particular sen being passed in.
+; Interface to function only accepts the sen argument as being a hashmap 
+; with a single key value pair, with the key being the name of the
+; senator, the value his vote vector. This is generalized to accept sen even if 
+; it does not exist in the votemap argument being passed in.
 (defn compute-voting-similarity
     [sen votemap]
-        (reduce 
-            merge (for [i (keys votemap) :when (not= i sen)] 
-                {i (dot-pdt (votemap i) (votemap sen))})))
+       (reduce 
+            ; iteratively compute dot product between sen and each senator in votemap
+            ; and always excluding the sen himself so that we avoid dotting the sen
+            ; votes to its ownself
+            merge (for [i (keys votemap) :when (not= i (key (first sen)))] 
+                {i (dot-pdt (votemap i) (val (first sen)))})))
+ 
        
 ; Sorts a voting similarity hashmap with the votes similarity arranged
 ; in descending order. The senator with the most similar vote pattern is 
@@ -82,7 +91,7 @@
 ; key.
 (defn sort-similarity-map
     [simmap]
-    (let [result simmap]             ; result is like a local variable
+    (let [result simmap]   ; result is like a local variable
         (into (sorted-map-by (fn [key1 key2]
             (compare [(get result key2) key2]
                      [(get result key1) key1])))
@@ -108,7 +117,7 @@
     (filter (fn [sen] (= (val sen) (val (last simmap))))
         simmap)))
 
-;; Lab Part 2.12.4: Policy comparison END
+;; Lab Part 2.12.4: Policy comparison COMPLETED
 
 ;; Lab Part 2.12.5: Not your average Democrat BEGIN
 
@@ -125,7 +134,7 @@
 ; Helper function that computes the mean of a given sequence of numbers
 (defn mean
     [scores]
-        (/ (reduce + scores) (float (count nums))))
+        (/ (reduce + scores) (float (count scores))))
 
 ; Task 2.12.7: find-average-similarity function
 (defn find-average-similarity
@@ -140,7 +149,15 @@
             (select-keys 
                     (compute-voting-similarity sen votemap) sens)))))
 
+; Task 2.12.8: find-average-record function
+(defn find-average-record
+    [senset votemap]
+    (let [voteset (select-keys votemap senset)]
+       ; divide the result of the vector sum by the number of elements to get average
+       (mapv (fn [sum] (/ sum (float (count voteset))))
+            ; compute sum of all the vote vectors
+            (reduce (fn [v1 v2] (mapv + v1 v2)) (vals voteset)))))
 
-
+;; Lab Part 2.12.5: Not your average Democrat COMPLETED
 
 
