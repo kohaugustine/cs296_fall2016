@@ -23,7 +23,7 @@
 ; separate strings, each string representing each field.
 (defn split-each-line
   [line]
-  (str/split line #" " 4))  ;; another quote to end the confusion "
+  (str/split line #" " 4))  
 
 
 ; Helper function for create-voting-dict
@@ -42,6 +42,9 @@
         (str/split (last info) #" "))))
 
 ; Task 2.12.1: create-voting-dict function 
+; Accepts the string of data directly read in from the file using slurp, and returns
+; a hashmap containing every senator's name as the key and his/her voting record 
+; vector as the value.
 (defn create-voting-dict
     [dataset]
     (zipmap
@@ -102,6 +105,8 @@
 ;; the given senator that is passed into the function.
 
 ; Task 2.12.3: most-similar function
+; Accepts the name of a senator, and the hashmap of senator-voting records, and
+; returns a Seq of senators whose voting records are most similar to the senator sen
 (defn most-similar
   [sen votemap]
   (let [simmap (sort-similarity-map (compute-voting-similarity 
@@ -110,6 +115,8 @@
         simmap)))
 
 ; Task 2.12.4: least-similar function
+; Accepts the name of a senator, and the hashmap of senator-voting records, and
+; returns a Seq of senators whose voting records are least similar to the senator sen
 (defn least-similar
   [sen votemap]
   (let [simmap (sort-similarity-map (compute-voting-similarity 
@@ -137,6 +144,8 @@
         (/ (reduce + scores) (float (count scores))))
 
 ; Task 2.12.7: find-average-similarity function
+; Accepts the name of a senator, a set of senator names, and the dictionary
+; of senator-votes, and returns a float representing the average pattern voting similarity 
 (defn find-average-similarity
     [sen senset votemap]
     ; filtering step to remove the senator passed in as sen in case he is
@@ -144,12 +153,15 @@
     (let [sens (filter (fn [name] (not= sen name)) senset)]
      (mean (vals 
             ; Compute the similarity score of sen with each senator in votemap, and then
-            ; select using select-keys, only those senators that belong in sens
+            ; select using select-keys, only those senators that belong in sens to return
             ; TODO: Redundant computation; figure a more efficient way
             (select-keys 
                     (compute-voting-similarity sen votemap) sens)))))
 
 ; Task 2.12.8: find-average-record function
+; Accepts a seq of senator name strings, and the hashmap of senator-voting records, and
+; returns a vector of the average voting record across all the senators passed in as 
+; senset
 (defn find-average-record
     [senset votemap]
     (let [voteset (select-keys votemap senset)]
