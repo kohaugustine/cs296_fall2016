@@ -10,7 +10,7 @@ In this lab, we will represent a US senator’s voting record as a vector over R
 
 All data required is found in the `US_Senate_voting_data_109.txt` file, which contains the voting record for each senator in the 109th Congress.
 
-The data was obtained from the (webpage associated with the book)[http://resources.codingthematrix.com/].
+The data was obtained from the [webpage associated with the book](http://resources.codingthematrix.com/).
 
 ### Running the code
 
